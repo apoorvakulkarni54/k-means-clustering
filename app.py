@@ -11,7 +11,7 @@ import streamlit as st
 st.set_page_config(page_title="Energy Cluster Predictor", page_icon="⚡", layout="wide")
 
 # ---------- Step 1: Load the saved model, scaler and data ----------
-saved = joblib.load("model/kmeans_model.joblib")
+saved = joblib.load("kmeans_notebook.joblib")
 model = saved["model"]          # trained K-Means
 scaler = saved["scaler"]        # StandardScaler used during training
 FEATURES = saved["features"]    # ['energy_consumption', 'temperature']
