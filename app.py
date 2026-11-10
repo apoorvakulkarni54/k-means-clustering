@@ -13,7 +13,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 
-# ---------- Step 1: Page configuration ----------
+# ---------- Step 1: Page Configuration ----------
 
 st.set_page_config(
     page_title="Energy Cluster Predictor",
@@ -21,7 +21,6 @@ st.set_page_config(
     layout="wide"
 )
 
-# Find files relative to app.py
 BASE_DIR = Path(__file__).resolve().parent
 
 MODEL_PATH = BASE_DIR / "kmeans_notebook.joblib"
@@ -40,7 +39,7 @@ COLORS = [
 ]
 
 
-# ---------- Step 2: Load model and scaler ----------
+# ---------- Step 2: Load Model and Scaler ----------
 
 @st.cache_resource
 def load_model_and_scaler():
@@ -52,7 +51,6 @@ def load_model_and_scaler():
 
     saved = joblib.load(MODEL_PATH)
 
-    # If the saved file contains a dictionary
     if isinstance(saved, dict):
 
         if "model" not in saved:
@@ -66,16 +64,14 @@ def load_model_and_scaler():
 
         features = saved.get("features", FEATURES)
 
-    # If the saved file contains the K-Means model directly
     else:
 
         model = saved
 
-        features = FEATURES
-
         scaler = None
 
-    # Load scaler separately if it was not included
+        features = FEATURES
+
     if scaler is None:
 
         if not SCALER_PATH.exists():
@@ -99,7 +95,7 @@ except Exception as e:
     st.stop()
 
 
-# ---------- Step 3: Load energy dataset ----------
+# ---------- Step 3: Load Dataset ----------
 
 @st.cache_data
 def load_data():
@@ -135,17 +131,14 @@ except Exception as e:
     st.stop()
 
 
-# ---------- Step 4: Generate cluster labels ----------
-
-# Make sure the dataset contains valid numeric values
-data = data.dropna(subset=FEATURES).copy()
+# ---------- Step 4: Prepare Dataset ----------
 
 data[FEATURES] = data[FEATURES].apply(
     pd.to_numeric,
     errors="coerce"
 )
 
-data = data.dropna(subset=FEATURES)
+data = data.dropna(subset=FEATURES).copy()
 
 if data.empty:
 
@@ -156,14 +149,14 @@ if data.empty:
     st.stop()
 
 
-# Scale dataset using the same scaler used during training
+# ---------- Step 5: Predict Clusters ----------
+
 scaled_data = scaler.transform(data[FEATURES])
 
-# Predict cluster numbers
 data["cluster"] = model.predict(scaled_data)
 
 
-# ---------- Step 5: Calculate cluster centres ----------
+# ---------- Step 6: Calculate Cluster Centres ----------
 
 centres = pd.DataFrame(
     scaler.inverse_transform(model.cluster_centers_),
@@ -175,9 +168,10 @@ avg_energy = data["energy_consumption"].mean()
 avg_temp = data["temperature"].mean()
 
 
-# ---------- Step 6: Give clusters easy names ----------
+# ---------- Step 7: Name Clusters ----------
 
 names = {}
+
 advice = {}
 
 for i, row in centres.iterrows():
@@ -213,7 +207,7 @@ for i, row in centres.iterrows():
 data["segment"] = data["cluster"].map(names)
 
 
-# ---------- Step 7: Page style ----------
+# ---------- Step 8: Page Style ----------
 
 st.markdown(
     """
@@ -275,7 +269,7 @@ st.markdown(
 )
 
 
-# ---------- Step 8: User input ----------
+# ---------- Step 9: User Input ----------
 
 st.sidebar.header("🔧 Enter values")
 
@@ -300,7 +294,7 @@ st.sidebar.caption(
 )
 
 
-# ---------- Step 9: Predict cluster ----------
+# ---------- Step 10: Predict User Input ----------
 
 new_data = pd.DataFrame(
     [[energy, temperature]],
@@ -314,7 +308,7 @@ cluster = int(model.predict(new_scaled)[0])
 color = COLORS[cluster % len(COLORS)]
 
 
-# ---------- Step 10: Display prediction ----------
+# ---------- Step 11: Display Prediction ----------
 
 left, right = st.columns([1, 1.4])
 
@@ -354,7 +348,6 @@ with left:
         f"{temperature - avg_temp:+.1f} vs average"
     )
 
-    # Distance from input to cluster centres
     distances = (
         (new_scaled - model.cluster_centers_) ** 2
     ).sum(axis=1) ** 0.5
@@ -374,13 +367,12 @@ with left:
     )
 
 
-# ---------- Step 11: Visualize clusters ----------
+# ---------- Step 12: Visualize Clusters ----------
 
 with right:
 
     st.subheader("Where your reading falls")
 
-    # Avoid sampling more rows than the dataset contains
     plot_data = data.sample(
         n=min(2500, len(data)),
         random_state=1
@@ -399,7 +391,6 @@ with right:
         }
     )
 
-    # User's input
     fig.add_trace(
         go.Scatter(
             x=[temperature],
@@ -418,7 +409,6 @@ with right:
         )
     )
 
-    # Cluster centres
     fig.add_trace(
         go.Scatter(
             x=centres["temperature"],
@@ -450,7 +440,7 @@ with right:
     )
 
 
-# ---------- Step 12: Predict from CSV ----------
+# ---------- Step 13: Predict from CSV ----------
 
 st.divider()
 
@@ -515,7 +505,7 @@ if file:
         )
 
 
-# ---------- Step 13: Cluster summary ----------
+# ---------- Step 14: Cluster Summary ----------
 
 with st.expander("📋 Cluster summary"):
 
