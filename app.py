@@ -212,7 +212,6 @@ data["segment"] = data["cluster"].map(names)
 st.markdown(
     """
     <style>
-
     .hero {
         padding: 26px 30px;
         border-radius: 18px;
@@ -251,22 +250,19 @@ st.markdown(
         margin: 8px 0 0;
         color: #D0D6E0;
     }
-
     </style>
 
     <div class="hero">
-
         <h1>⚡ Energy Cluster Predictor</h1>
-
         <p>
-        Enter an energy reading and temperature.
-        The K-Means model tells you which group it belongs to.
+            Enter an energy reading and temperature.
+            The K-Means model tells you which group it belongs to.
         </p>
-
     </div>
     """,
     unsafe_allow_html=True
 )
+
 
 
 # ---------- Step 9: User Input ----------
