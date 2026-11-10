@@ -309,23 +309,17 @@ color = COLORS[cluster % len(COLORS)]
 left, right = st.columns([1, 1.4])
 
 
+
 with left:
 
     st.subheader("Prediction")
 
     st.markdown(
-        f"""
-        <div class="result" style="--c:{color}">
+        f"## Cluster {cluster}"
+    )
 
-            <h2>Cluster {cluster}</h2>
-
-            <b>{names[cluster]}</b>
-
-            <p>{advice[cluster]}</p>
-
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.success(
+        f"**{names[cluster]}**\n\n{advice[cluster]}"
     )
 
     st.write("")
